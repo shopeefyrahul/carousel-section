@@ -1,0 +1,152 @@
+<div class="custom-slider-section" style="background: {{ section.settings.bg_color }}">
+  <div class="page-width py-10">
+    <h2 class="text-3xl font-bold mb-6" style="color: {{ section.settings.text_color }}">
+      {{ section.settings.slider_heading }}
+    </h2>
+    
+    <div id="splide-slider" class="splide">
+      <div class="splide__track">
+        <ul class="splide__list">
+          {% for block in section.blocks %}
+            {% assign product = all_products[block.settings.product] %}
+            {% if product %}
+            <li class="splide__slide">
+              <div class="custom-slider-card">
+                <!-- Product Image -->
+                <img class="product-image" src="{{ product.featured_image | img_url: 'medium' }}" alt="{{ product.title }}">
+                <!-- Judge.me review stars -->
+                <div class="jdgm-widget jdgm-preview-badge" data-handle="{{ product.handle }}"></div>
+                <!-- Title -->
+                <h3 class="cst-product-title">{{ product.title }}</h3>
+
+                <!-- Size -->
+                <div class="p_size">
+                  <label>Size:</label>
+                  {% for option in product.options_with_values %}
+                    {% if option.name == 'Size' %}
+                      <select class="size-select border p-1 w-full mb-2" data-option-index="{{ forloop.index0 }}">
+                        {% for value in option.values %}
+                          <option value="{{ value }}">{{ value }}</option>
+                        {% endfor %}
+                      </select>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                <!-- Color -->
+                <div class="p_color">
+                  <label>Color:</label>
+                  {% for option in product.options_with_values %}
+                    {% if option.name == 'Color' %}
+                      <div class="flex gap-2 mt-1 mb-2 color-swatch-group" data-option-index="{{ forloop.index0 }}">
+                        {% for value in option.values %}
+                          <button 
+                            class="color-swatch w-6 h-6 rounded-full border border-gray-300" 
+                            style="background-color: {{ value | downcase }};" 
+                            data-color="{{ value }}"
+                            title="{{ value }}">
+                          </button>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                <!-- Hidden Variant Dropdown -->
+                {% if product.variants.size > 1 %}
+                <select class="variant-select hidden">
+                  {% for variant in product.variants %}
+                    <option value="{{ variant.id }}"
+                            data-price="{{ variant.price | money }}"
+                            data-image="{{ variant.featured_image | img_url: 'medium' }}"
+                            data-title="{{ variant.title }}">
+                      {{ variant.title }}
+                    </option>
+                  {% endfor %}
+                </select>
+                {% endif %}
+
+                <!-- Add to Cart -->
+                {% assign first_variant = product.variants.first %}
+
+                {% if first_variant.available %}
+                  <button class="add-to-cart-btn bg-black text-white px-4 py-2 w-full mt-2 rounded"
+                          data-variant-id="{{ first_variant.id }}">
+                    {{ section.settings.button_text }} - {{ product.price | money }}
+                    <span class="price_compare">{{ product.compare_at_price | money }}</span> 
+                  </button>
+                {% else %}
+                  <button class="add-to-cart-btn-out-of-stock bg-gray-400 text-white px-4 py-2 w-full mt-2 rounded cursor-not-allowed" disabled>
+                    OUT OF STOCK
+                  </button>
+                {% endif %}
+              </div>
+            </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="mini-cart-notice fixed top-6 right-6 bg-green-600 text-white px-4 py-2 rounded shadow hidden z-50">
+      Product added to cart! <a href="/cart" class="underline ml-2">View Cart</a>
+    </div>
+  </div>
+</div>
+{% schema %}
+{
+  "name": "Custom Splide Slider",
+  "settings": [
+    {
+      "type": "text",
+      "id": "slider_heading",
+      "label": "Slider Heading",
+      "default": "Our Products"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Heading Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "products_per_slide",
+      "label": "Products Per Slide",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Add Button Text",
+      "default": "ADD"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product_block",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Select Product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "TV Cst Product Slider",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
